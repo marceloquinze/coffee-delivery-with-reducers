@@ -26,7 +26,7 @@ export function Checkout() {
     invalidFields,
   } = useContext(UserContext)
 
-  const inCart = itemsInCart
+  // const inCart = itemsInCart
 
   return (
     <CheckoutContainer className="checkout-container">
@@ -46,10 +46,10 @@ export function Checkout() {
       <aside>
         <h2>Selected coffees</h2>
         <MiniCartContainer className="mini-cart-container">
-          {inCart.length > 0 ? (
+          {itemsInCart.length > 0 ? (
             <>
               <div className="items">
-                {inCart.map((item) => {
+                {itemsInCart.map((item) => {
                   return (
                     <MiniCart
                       key={item.id}
@@ -68,7 +68,7 @@ export function Checkout() {
                   )
                 })}
               </div>
-              <Summary itemsInCart={inCart} />
+              <Summary itemsInCart={itemsInCart} />
               <div className="confirm">
                 <button onClick={createOrder} type="submit">
                   Confirm order

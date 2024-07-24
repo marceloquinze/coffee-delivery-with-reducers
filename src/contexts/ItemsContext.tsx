@@ -1,4 +1,12 @@
-import { FormEvent, ReactNode, createContext, useEffect, useState } from 'react'
+import {
+  FormEvent,
+  ReactNode,
+  createContext,
+  useEffect,
+  useReducer,
+} from 'react'
+import { ItemsReducer } from '../reducers/ItemsReducer'
+import { ActionTypes } from '../reducers/ActionTypes'
 
 export interface Coffees {
   id: string
@@ -29,31 +37,23 @@ interface ItemsContextProviderProps {
 }
 
 export function ItemsContextProvider({ children }: ItemsContextProviderProps) {
-  // ------ STATES ------
-
-  // 1. Initial items
-  const [items, setItems] = useState<Coffees[]>(() => {
-    // initial items are fetched from JSON file, then stored in localStorage, then fetched here
-    const initialItems = localStorage.getItem(
-      '@coffee-delivery:initial-items-1.0.0',
-    )
-    return initialItems ? JSON.parse(initialItems) : []
-  })
-
-  // 2. Items in cart
-  const [itemsInCart, setItemsInCart] = useState<Coffees[]>(() => {
-    // initial state of the cart
-    const savedCartItems = localStorage.getItem(
-      '@coffee-delivery:itemsInCart-1.0.0',
-    )
-    return savedCartItems ? JSON.parse(savedCartItems) : []
-  })
+  // ------ INITIAL STATE ------
+  const initialItems = localStorage.getItem('@coffee-delivery:items-1.0.0')
+  const savedCartItems = localStorage.getItem(
+    '@coffee-delivery:itemsInCart-1.0.0',
+  )
+  const initialState = {
+    items: initialItems ? JSON.parse(initialItems) : [],
+    cartItems: savedCartItems ? JSON.parse(savedCartItems) : [],
+  }
+  // ------ REDUCERS ------
+  const [state, dispatch] = useReducer(ItemsReducer, initialState)
 
   // ------ EFFECTS ------
-
-  // 1. the initial data comes from a JSON file
+  // 1. get items from api
   useEffect(() => {
-    if (items.length === 0) {
+    // Check if there are items in state
+    if (state.items.length === 0) {
       const url = 'coffee.json'
       fetch(url)
         .then((response) => {
@@ -63,78 +63,55 @@ export function ItemsContextProvider({ children }: ItemsContextProviderProps) {
           return response.json()
         })
         .then((data) => {
-          setItems(data)
+          // Modify state with items from api creating an items array
+          dispatch({ type: ActionTypes.SET_ITEMS, payload: data })
         })
     }
-  }, [items.length])
+  }, [state.items.length])
 
-  // 2. initial data is stored in localStorage
+  // 2. set items in cart (actually create the cart)
   useEffect(() => {
-    // as soon as items are fetched from the JSON file, they'll be added to localStorage
-    localStorage.setItem(
-      '@coffee-delivery:initial-items-1.0.0',
-      JSON.stringify(items),
+    const updatedCartItems = state.items.filter(
+      (item: Coffees) => item.onCart && item.qty > 0,
     )
-  }, [items])
+    // Modify state with items in cart
+    dispatch({ type: ActionTypes.SET_ITEMS_IN_CART, payload: updatedCartItems })
+  }, [state.items])
 
-  // 3. cart items are stored in localStorage
+  // 3. save items in local storage (when state changes)
   useEffect(() => {
-    // as soon as initialItems qty is changed, we create a new storage containing only items w/ qty set
-    // this will be triggered by the sendItemsToCart function below
-    const updatedCartItems = items.filter((item) => item.onCart && item.qty > 0)
-    setItemsInCart(updatedCartItems)
     localStorage.setItem(
-      '@coffee-delivery:itemsInCart-1.0.0',
-      JSON.stringify(updatedCartItems),
+      '@coffee-delivery:itensInCart-1.0.0',
+      JSON.stringify(state.cartItems),
     )
-  }, [items])
+    localStorage.setItem(
+      '@coffee-delivery:items-1.0.0',
+      JSON.stringify(state.items),
+    )
+  }, [state])
 
-  // ------ HELPER FUNCTIONS ------
+  // // ------ HELPER FUNCTIONS ------
 
   // 1. increment and decrement
   function incrementItems(idToIncrement: string) {
-    setItems((prevState) =>
-      prevState.map((item) =>
-        item.id === idToIncrement ? { ...item, qty: item.qty + 1 } : item,
-      ),
-    )
+    dispatch({ type: ActionTypes.INCREMENT_ITEMS, payload: idToIncrement })
   }
   function decrementItems(idToDecrement: string) {
-    setItems((prevState) =>
-      prevState.map((item) =>
-        item.id === idToDecrement && item.qty !== 0
-          ? { ...item, qty: item.qty - 1 }
-          : item,
-      ),
-    )
+    dispatch({ type: ActionTypes.DECREMENT_ITEMS, payload: idToDecrement })
   }
 
-  // 2. change quantity
-  // this will be triggered whenever the qty input changes,
-  // whether it is via +/- buttons or direct typing a value
-  // this can help make this a controlled input
+  // // 2. change quantity
   function changeQuantity(id: string, newQty: number) {
-    setItems((prevState) =>
-      prevState.map((item) =>
-        item.id === id ? { ...item, qty: newQty } : item,
-      ),
-    )
+    dispatch({ type: ActionTypes.CHANGE_QTY, payload: { id, newQty } })
   }
 
   // 3. send items to cart
-  // this will be triggered once we click on the cart button (onSendToCart)
-  // via form event
   function sendItemsToCart(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const formData = new FormData(e.target as HTMLFormElement)
     const id = formData.get('id') as string
 
-    // map all items and update setItems state passing onCart as true
-    setItems((prevState) =>
-      prevState.map((item) =>
-        String(item.id) === id ? { ...item, onCart: true } : item,
-      ),
-    )
+    dispatch({ type: ActionTypes.SEND_ITEMS_TO_CART, payload: id })
   }
 
   // 4. remove items from cart
@@ -143,29 +120,20 @@ export function ItemsContextProvider({ children }: ItemsContextProviderProps) {
     const formData = new FormData(e.target as HTMLFormElement)
     const id = formData.get('id') as string
 
-    // update setItemsInCart state passing onCart as false
-    setItems((prevState) =>
-      prevState.map((item) =>
-        String(item.id) === id ? { ...item, onCart: false, qty: 0 } : item,
-      ),
-    )
+    dispatch({ type: ActionTypes.REMOVE_ITEMS_IN_CART, payload: id })
   }
 
   // 5. clear cart
   function clearCart() {
-    setItems((prevState) =>
-      prevState.map((item) => ({ ...item, onCart: false, qty: 0 })),
-    )
+    dispatch({ type: ActionTypes.CLEAR_CART })
   }
 
   // ------ RETURN ------
   return (
     <ItemsContext.Provider
-      // this goes around every element that needs values coming from this context
-      // you'll find it on App.tsx
       value={{
-        items,
-        itemsInCart,
+        items: state.items,
+        itemsInCart: state.cartItems,
         decrementItems,
         incrementItems,
         changeQuantity,
