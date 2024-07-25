@@ -14,6 +14,7 @@ export function Checkout() {
     incrementItems,
     itemsInCart,
     removeItemsInCart,
+    deliveryPrice,
   } = useContext(ItemsContext)
 
   const {
@@ -68,7 +69,10 @@ export function Checkout() {
                   )
                 })}
               </div>
-              <Summary itemsInCart={itemsInCart} />
+              <Summary
+                itemsInCart={itemsInCart}
+                deliveryPrice={deliveryPrice}
+              />
               <div className="confirm">
                 <button onClick={createOrder} type="submit">
                   Confirm order

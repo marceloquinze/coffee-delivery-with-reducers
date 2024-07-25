@@ -8,16 +8,19 @@ export function Success() {
   const { order } = useContext(UserContext)
   return (
     <SuccessContainer className="success-container">
-      <div className="left">
-        <h1>Wow! Order placed successfully!</h1>
-        <p>
-          You just need to wait a few minutes and your coffee will be on its way
-        </p>
-        <OrderSummary order={order} />
-      </div>
+      <div className="outer">
+        <div className="left">
+          <h1>Wow! Order placed successfully!</h1>
+          <p>
+            You just need to wait a few minutes and your coffee will be on its
+            way
+          </p>
+          <OrderSummary order={order} />
+        </div>
 
-      <div className="right">
-        <img src={SuccessImg} alt="" />
+        <div className="right">
+          <img src={SuccessImg} alt="" />
+        </div>
       </div>
     </SuccessContainer>
   )

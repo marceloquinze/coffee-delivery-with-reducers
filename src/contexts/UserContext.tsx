@@ -6,17 +6,15 @@ import {
   useEffect,
   useState,
   useContext,
+  useReducer,
 } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { v4 as uuidv4 } from 'uuid'
 
 import { ItemsContext, Coffees } from './ItemsContext'
-
-interface Validation {
-  valid: boolean
-  msgs: string[]
-  fields: { [key: string]: boolean }
-}
+import { UserReducer } from '../reducers/UserReducer'
+import { ActionTypes } from '../reducers/ActionTypes'
+import { validateOrder } from '../helpers/validateUserForm'
 
 export interface UserDetails {
   cep: string
@@ -65,26 +63,30 @@ interface UserContextProviderProps {
 }
 
 export function UserContextProvider({ children }: UserContextProviderProps) {
+  // ------ INITIAL STATES ------
+  const savedPayment = localStorage.getItem('@coffee-delivery:payment-1.0.0')
+  const savedUserDetails = localStorage.getItem(
+    '@coffee-delivery:userDetails-1.0.0',
+  )
+  const savedOrder = localStorage.getItem('@coffee-delivery:order-1.0.0')
+  const savedOrderHistory = localStorage.getItem(
+    '@coffee-delivery:orderHistory-1.0.0',
+  )
+
+  const initialUserState = {
+    payment: savedPayment ? JSON.parse(savedPayment) : '',
+    userDetails: savedUserDetails ? JSON.parse(savedUserDetails) : {},
+    order: savedOrder ? JSON.parse(savedOrder) : {},
+    orderHistory: savedOrderHistory ? JSON.parse(savedOrderHistory) : [],
+  }
+
+  // ------ REDUCERS ------
+  const [state, dispatch] = useReducer(UserReducer, initialUserState)
+
   // ------ CONTEXTS ------
 
-  const { itemsInCart, clearCart } = useContext(ItemsContext)
+  const { itemsInCart, clearCart, deliveryPrice } = useContext(ItemsContext)
   const navigate = useNavigate()
-
-  // ------ STATES ------
-
-  // 1. payment
-  const [payment, setPayment] = useState<string>(() => {
-    const savedPayment = localStorage.getItem('@coffee-delivery:payment-1.0.0')
-    return savedPayment ? JSON.parse(savedPayment) : ''
-  })
-
-  // 2. user details
-  const [userDetails, setUserDetails] = useState<UserDetails>(() => {
-    const savedUserDetails = localStorage.getItem(
-      '@coffee-delivery:userDetails-1.0.0',
-    )
-    return savedUserDetails ? JSON.parse(savedUserDetails) : {}
-  })
 
   // 3. validation
   const [validationMsg, setValidationMsg] = useState<string[]>([])
@@ -92,50 +94,26 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
     [key: string]: boolean
   }>({})
 
-  // 4. order
-  const [order, setOrder] = useState<Order>(() => {
-    const savedOrder = localStorage.getItem('@coffee-delivery:order-1.0.0')
-    return savedOrder ? JSON.parse(savedOrder) : {}
-  })
-
-  // 5. order history
-  const [orderHistory, setOrderHistory] = useState<Order[]>(() => {
-    const savedOrderHistory = localStorage.getItem(
-      '@coffee-delivery:orderHistory-1.0.0',
-    )
-    return savedOrderHistory ? JSON.parse(savedOrderHistory) : []
-  })
-
   // ------ EFFECTS ------
 
-  // 1. set payment
   useEffect(() => {
     localStorage.setItem(
       '@coffee-delivery:payment-1.0.0',
-      JSON.stringify(payment),
+      JSON.stringify(state.payment),
     )
-  }, [payment])
-
-  // 2. set user details
-  useEffect(() => {
     localStorage.setItem(
       '@coffee-delivery:userDetails-1.0.0',
-      JSON.stringify(userDetails),
+      JSON.stringify(state.userDetails),
     )
-  }, [userDetails])
-
-  // 3. set order
-  useEffect(() => {
-    localStorage.setItem('@coffee-delivery:order-1.0.0', JSON.stringify(order))
-  }, [order])
-
-  // 4. set order history
-  useEffect(() => {
+    localStorage.setItem(
+      '@coffee-delivery:order-1.0.0',
+      JSON.stringify(state.order),
+    )
     localStorage.setItem(
       '@coffee-delivery:orderHistory-1.0.0',
-      JSON.stringify(orderHistory),
+      JSON.stringify(state.orderHistory),
     )
-  }, [orderHistory])
+  }, [state])
 
   // ------ HELPER FUNCTIONS ------
 
@@ -145,73 +123,30 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
     paymentType: string,
   ) {
     e.preventDefault()
-    setPayment(paymentType)
+    dispatch({ type: ActionTypes.TOGGLE_PAYMENT, payload: paymentType })
   }
 
   // 2. get user details
   function getUserDetails(
     e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>,
   ) {
-    setUserDetails({ ...userDetails, [e.target.name]: e.target.value })
-  }
-
-  // 3. validate order
-  function validateOrder(): Validation {
-    const messages: string[] = []
-    const fields: { [key: string]: boolean } = {}
-
-    if (!userDetails.cep) {
-      messages.push('Please fill in the CEP field')
-      fields.cep = true
-    } else if (!userDetails.cep.match(/^[0-9]{5}-[0-9]{3}$/)) {
-      messages.push('Invalid CEP')
-      fields.cep = true
-    }
-
-    if (!userDetails.street) {
-      messages.push('Please fill in the street field')
-      fields.street = true
-    }
-
-    if (!userDetails.number) {
-      messages.push('Please fill in the number field')
-      fields.number = true
-    } else if (!userDetails.number.match(/^[1-9]\d*$/)) {
-      messages.push('Invalid number')
-      fields.number = true
-    }
-
-    if (!userDetails.neighborhood) {
-      messages.push('Please fill in the neighborhood field')
-      fields.neighborhood = true
-    }
-
-    if (!userDetails.city) {
-      messages.push('Please fill in the city field')
-      fields.city = true
-    }
-
-    if (!userDetails.uf) {
-      messages.push('Please fill in the UF field')
-      fields.uf = true
-    }
-
-    if (!payment) {
-      messages.push('Please select a payment method')
-      fields.payment = true
-    }
-
-    if (!itemsInCart.length) {
-      messages.push('Cart is empty')
-    }
-
-    return { valid: messages.length === 0, msgs: messages, fields }
+    dispatch({
+      type: ActionTypes.SET_USER_DETAILS,
+      payload: {
+        name: e.target.name,
+        value: e.target.value,
+      },
+    })
   }
 
   // 4. create order
   function createOrder(e: MouseEvent<HTMLButtonElement>) {
     e.preventDefault()
-    const validation = validateOrder()
+    const validation = validateOrder(
+      state.userDetails,
+      state.payment,
+      itemsInCart,
+    )
     if (!validation.valid) {
       setValidationMsg(validation.msgs)
       setInvalidFields(validation.fields)
@@ -219,25 +154,26 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
       setValidationMsg([])
       setInvalidFields({})
 
-      const { street, number, neighborhood, city, uf } = userDetails
+      const { street, number, neighborhood, city, uf } = state.userDetails
 
       // create new order
       const newOrder: Order = {
         id: uuidv4().toString().substring(0, 8),
         userAddress: { street, number, neighborhood, city, uf },
-        payment,
+        payment: state.payment,
         itemsInCart,
-        total: itemsInCart.reduce((acc, item) => {
-          return acc + item.price * item.qty
-        }, 0),
+        total:
+          itemsInCart.reduce((acc, item) => {
+            return acc + item.price * item.qty
+          }, 0) + deliveryPrice,
         date: new Date(),
       }
 
       // update order state
-      setOrder(newOrder)
+      dispatch({ type: ActionTypes.CREATE_ORDER, payload: newOrder })
 
       // update order history state
-      setOrderHistory((prevOrderHistory) => [...prevOrderHistory, newOrder])
+      dispatch({ type: ActionTypes.SET_ORDER_HISTORY, payload: newOrder })
 
       // clear cart
       clearCart()
@@ -254,14 +190,14 @@ export function UserContextProvider({ children }: UserContextProviderProps) {
       // you'll find it on App.tsx
       value={{
         togglePayment,
-        payment,
+        payment: state.payment,
         getUserDetails,
-        userDetails,
+        userDetails: state.userDetails,
         createOrder,
         validationMsg,
         invalidFields,
-        order,
-        orderHistory,
+        order: state.order,
+        orderHistory: state.orderHistory,
       }}
     >
       {children}

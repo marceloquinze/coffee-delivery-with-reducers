@@ -1,16 +1,21 @@
 import styled from 'styled-components'
 
 export const SuccessContainer = styled.main`
-  max-width: 70rem;
-  margin: 0 auto;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  padding: 2rem;
+  .outer {
+    max-width: 70rem;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 2rem;
+  }
 
   @media (width < 768px) {
-    flex-direction: column;
-    row-gap: 2rem;
+    .outer {
+      flex-direction: column;
+      row-gap: 2rem;
+      align-items: center;
+    }
 
     & > div {
       width: 100%;

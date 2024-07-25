@@ -4,6 +4,7 @@ import {
   createContext,
   useEffect,
   useReducer,
+  useState,
 } from 'react'
 import { ItemsReducer } from '../reducers/ItemsReducer'
 import { ActionTypes } from '../reducers/ActionTypes'
@@ -28,6 +29,7 @@ interface ItemContextType {
   sendItemsToCart: (e: FormEvent<HTMLFormElement>) => void
   removeItemsInCart: (e: FormEvent<HTMLFormElement>) => void
   clearCart: () => void
+  deliveryPrice: number
 }
 
 export const ItemsContext = createContext({} as ItemContextType)
@@ -37,6 +39,9 @@ interface ItemsContextProviderProps {
 }
 
 export function ItemsContextProvider({ children }: ItemsContextProviderProps) {
+  // ------ SINGLE STATES ------
+  const [deliveryPrice, setDeliveryPrice] = useState<number>(0)
+
   // ------ INITIAL STATE ------
   const initialItems = localStorage.getItem('@coffee-delivery:items-1.0.0')
   const savedCartItems = localStorage.getItem(
@@ -68,6 +73,23 @@ export function ItemsContextProvider({ children }: ItemsContextProviderProps) {
         })
     }
   }, [state.items.length])
+
+  // get shop config values
+  useEffect(() => {
+    const url = 'shop-config.json'
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Data not found')
+        }
+        return response.json()
+      })
+      .then((data) => {
+        if (data.length > 0 && data[0].delivery_price !== undefined) {
+          setDeliveryPrice(data[0].delivery_price)
+        }
+      })
+  }, [])
 
   // 2. set items in cart (actually create the cart)
   useEffect(() => {
@@ -128,6 +150,9 @@ export function ItemsContextProvider({ children }: ItemsContextProviderProps) {
     dispatch({ type: ActionTypes.CLEAR_CART })
   }
 
+  // useEffect(() => {
+  //   console.log(config)
+  // }, [config])
   // ------ RETURN ------
   return (
     <ItemsContext.Provider
@@ -140,6 +165,7 @@ export function ItemsContextProvider({ children }: ItemsContextProviderProps) {
         sendItemsToCart,
         removeItemsInCart,
         clearCart,
+        deliveryPrice,
       }}
     >
       {children}

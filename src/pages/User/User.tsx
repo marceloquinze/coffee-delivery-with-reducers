@@ -7,6 +7,11 @@ import { Package } from 'phosphor-react'
 export function User() {
   const { getUserDetails, userDetails, invalidFields, orderHistory } =
     useContext(UserContext)
+
+  const sortedHistory = [...orderHistory].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )
+
   return (
     <UserContainer className="user-container">
       <div className="tabs">
@@ -26,8 +31,8 @@ export function User() {
           </div>
           <div className="content-tab" id="content2">
             <h1>Order History</h1>
-            {orderHistory.length ? (
-              orderHistory.map((order) => (
+            {sortedHistory.length ? (
+              sortedHistory.map((order) => (
                 <div key={order.id} className="eachOrder">
                   <Package size={32} />
                   <div>
@@ -36,7 +41,9 @@ export function User() {
                     </p>
                     <p>
                       <strong>Date:</strong>{' '}
-                      {new Date(order.date).toLocaleDateString()}
+                      {new Date(order.date).toLocaleDateString() +
+                        ' at ' +
+                        new Date(order.date).toLocaleTimeString()}
                     </p>
                     <p>
                       <strong>Payment details:</strong> $

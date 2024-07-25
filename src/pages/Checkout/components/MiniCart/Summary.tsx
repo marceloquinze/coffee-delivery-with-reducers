@@ -2,8 +2,9 @@ import { Coffees } from '../../../../contexts/ItemsContext'
 
 interface SummaryProps {
   itemsInCart: Coffees[]
+  deliveryPrice: number
 }
-export function Summary({ itemsInCart }: SummaryProps) {
+export function Summary({ itemsInCart, deliveryPrice }: SummaryProps) {
   const total = itemsInCart.reduce(
     (acc, item) => acc + item.qty * item.price,
     0,
@@ -17,12 +18,12 @@ export function Summary({ itemsInCart }: SummaryProps) {
       </div>
       <div className="delivery">
         <p>
-          Delivery: <span>$ 3.00</span>
+          Delivery: <span>$ {deliveryPrice.toFixed(2)}</span>
         </p>
       </div>
       <div className="grandTotal">
         <p>
-          Total: <span>$ {(total + 3).toFixed(2)}</span>
+          Total: <span>$ {(total + deliveryPrice).toFixed(2)}</span>
         </p>
       </div>
     </div>
