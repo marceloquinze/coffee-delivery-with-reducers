@@ -30,7 +30,7 @@ export function CatalogueItem({
 }: CatalogueItemProps) {
   return (
     <CatalogueItemContainer className="catalogue-item">
-      <img src={`src/assets/${image}`} alt={title} />
+      <img src={`${image}`} alt={title} />
       <div className="tags">
         {tags.map((item, index) => {
           return (

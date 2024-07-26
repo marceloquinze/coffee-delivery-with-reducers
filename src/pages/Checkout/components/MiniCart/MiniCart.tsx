@@ -27,7 +27,7 @@ export function MiniCart({
   return (
     <div className="item">
       <div className="first">
-        <img src={`src/assets/${image}`} alt={title} />
+        <img src={`${image}`} alt={title} />
       </div>
       <div className="second">
         <div className="title-form">
