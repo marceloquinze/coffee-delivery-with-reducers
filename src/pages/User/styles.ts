@@ -67,5 +67,26 @@ export const UserContainer = styled.main`
         font-style: italic;
       }
     }
+
+    .pagination {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 2rem;
+
+      button {
+        padding: 0.5rem 1rem;
+        background-color: ${(props) => props.theme['base-text']};
+        color: ${(props) => props.theme.white};
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+
+        &:disabled {
+          background-color: ${(props) => props.theme['base-hover']};
+        }
+      }
+    }
   }
 `

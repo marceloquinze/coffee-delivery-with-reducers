@@ -1,7 +1,7 @@
 import { UserDetailsComp } from '../Checkout/components/UserDetails/UserDetails'
 import { UserContainer } from './styles'
 import { UserContext } from '../../contexts/UserContext'
-import { useContext } from 'react'
+import { useContext, useState } from 'react'
 import { Package } from 'phosphor-react'
 
 export function User() {
@@ -11,6 +11,28 @@ export function User() {
   const sortedHistory = [...orderHistory].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   )
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 5
+
+  // Page indexes
+  const indexOfLastItem = currentPage * itemsPerPage // 10
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage // 5
+  const currentItems = sortedHistory.slice(indexOfFirstItem, indexOfLastItem)
+
+  // Next and previous page
+  function nextPage() {
+    if (currentPage < Math.ceil(sortedHistory.length / itemsPerPage)) {
+      setCurrentPage(currentPage + 1)
+    }
+  }
+
+  function previousPage() {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1)
+    }
+  }
 
   return (
     <UserContainer className="user-container">
@@ -31,8 +53,8 @@ export function User() {
           </div>
           <div className="content-tab" id="content2">
             <h1>Order History</h1>
-            {sortedHistory.length ? (
-              sortedHistory.map((order) => (
+            {currentItems.length ? (
+              currentItems.map((order) => (
                 <div key={order.id} className="eachOrder">
                   <Package size={32} />
                   <div>
@@ -65,6 +87,21 @@ export function User() {
             ) : (
               <p>You do not have any order yet</p>
             )}
+
+            <div className="pagination">
+              <button onClick={previousPage} disabled={currentPage === 1}>
+                Previous
+              </button>
+              <span>Page {currentPage}</span>
+              <button
+                onClick={nextPage}
+                disabled={
+                  currentPage === Math.ceil(sortedHistory.length / itemsPerPage)
+                }
+              >
+                Next
+              </button>
+            </div>
           </div>
         </div>
       </div>
