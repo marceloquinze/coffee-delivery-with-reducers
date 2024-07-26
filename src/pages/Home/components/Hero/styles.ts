@@ -4,12 +4,6 @@ export const HeroWrapperContainer = styled.section`
   position: relative;
   padding: 0 2rem;
 
-  @media (width < 768px) {
-    div {
-      flex-wrap: wrap;
-    }
-  }
-
   .heroBg {
     position: absolute;
     top: 0;
@@ -17,6 +11,12 @@ export const HeroWrapperContainer = styled.section`
     max-height: 544px;
     width: 100vw;
     z-index: -2;
+  }
+
+  @media (width < 768px) {
+    div {
+      flex-wrap: wrap;
+    }
   }
 `
 
@@ -33,19 +33,8 @@ export const HeroContainer = styled.div`
     width: 60%;
   }
 
-  /* .right {
-    flex-shrink: 2;
-  } */
-
   & > div {
     width: 50%;
-  }
-
-  @media (width < 1025px) {
-    padding: 4rem 0;
-    & > div {
-      width: 100% !important;
-    }
   }
 
   h1 {
@@ -72,12 +61,6 @@ export const HeroContainer = styled.div`
       align-items: center;
       margin-bottom: 1.25rem;
       gap: 0.5rem;
-      /* justify-content: space-between; */
-
-      @media (width < 600px) {
-        text-align: center;
-        justify-content: center;
-      }
 
       .yellow-dark {
         background: ${(props) => props.theme['yellow-dark']};
@@ -105,6 +88,28 @@ export const HeroContainer = styled.div`
         svg {
           fill: ${(props) => props.theme.white};
         }
+      }
+    }
+  }
+
+  @media (width < 1025px) {
+    padding: 4rem 0;
+    & > div {
+      width: 100% !important;
+      text-align: center;
+    }
+  }
+
+  @media (width < 600px) {
+    h2 {
+      margin-bottom: 2rem;
+    }
+    .highlights {
+      display: block;
+
+      .item {
+        text-align: center;
+        justify-content: flex-start;
       }
     }
   }

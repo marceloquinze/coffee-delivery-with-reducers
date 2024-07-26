@@ -8,10 +8,6 @@ export const CheckoutContainer = styled.main`
   gap: 1.5rem;
   padding: 2rem;
 
-  @media (width < 1025px) {
-    grid-template-columns: 1fr;
-  }
-
   h2 {
     font-size: 1.125rem;
     padding-bottom: 1rem;
@@ -21,6 +17,18 @@ export const CheckoutContainer = styled.main`
   .confirm p {
     padding-top: 1rem;
     color: ${(props) => props.theme.danger};
+  }
+
+  @media (width < 1025px) {
+    grid-template-columns: 1fr;
+
+    aside {
+      order: 0;
+    }
+
+    section {
+      order: 1;
+    }
   }
 `
 export const MiniCartContainer = styled.div`
@@ -136,12 +144,11 @@ export const MiniCartContainer = styled.div`
           border-radius: 8px;
           height: 38px;
           font-size: 1rem;
-          width: 70px;
 
           .qty {
-            padding: 0 0.5rem;
+            padding: 0;
             border: none;
-            width: 40px;
+            width: 20px;
             text-align: center;
             background: transparent;
           }
@@ -152,6 +159,7 @@ export const MiniCartContainer = styled.div`
             color: ${(props) => props.theme.purple};
             font-size: 1rem;
             cursor: pointer;
+            padding: 0 0.5rem;
           }
         }
       }

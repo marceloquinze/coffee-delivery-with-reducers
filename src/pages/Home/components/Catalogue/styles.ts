@@ -30,6 +30,7 @@ export const CatalogueContainer = styled.section`
   @media (width < 480px) {
     .items {
       grid-template-columns: repeat(1, minmax(0, 1fr));
+      gap: 4rem;
     }
   }
 `
@@ -90,7 +91,7 @@ export const CatalogueItemContainer = styled.div`
     .price b {
       font-family: 'Baloo 2', sans-serif;
       font-size: 1.5rem;
-      margin-right: 1.5rem;
+      margin-right: 0.5rem;
     }
 
     .cart {
@@ -117,11 +118,12 @@ export const CatalogueItemContainer = styled.div`
       border-radius: 8px;
       height: 38px;
       font-size: 1rem;
+      margin-right: 0.5rem;
 
       .qty {
-        padding: 0 0.5rem;
+        padding: 0;
         border: none;
-        width: 40px;
+        width: 20px;
         text-align: center;
         background: transparent;
       }
@@ -132,6 +134,7 @@ export const CatalogueItemContainer = styled.div`
         color: ${(props) => props.theme.purple};
         font-size: 1rem;
         cursor: pointer;
+        padding: 0 0.5rem;
       }
     }
   }

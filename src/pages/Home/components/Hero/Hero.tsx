@@ -9,30 +9,30 @@ export function Hero() {
     <HeroWrapperContainer className="hero-background">
       <HeroContainer className="hero-container">
         <div className="left">
-          <h1>Encontre o café perfeito para qualquer hora do dia</h1>
+          <h1>Find the perfect coffee for any time of day.</h1>
           <h2>
-            Com o Coffee Delivery você recebe seu café onde estiver, a qualquer
-            hora
+            With Coffee Delivery, you receive your coffee wherever you are,
+            anytime.
           </h2>
           <div className="highlights">
             <HighlightItem
               color={'yellow-dark'}
-              text="Compra simples e segura"
+              text="Order safely and fast"
               icon={<ShoppingCart size={16} weight="fill" />}
             />
             <HighlightItem
               color={'base-text'}
-              text="Embalagem mantém o café intacto"
+              text="Packaging keeps coffee intact"
               icon={<Package size={16} weight="fill" />}
             />
             <HighlightItem
               color={'yellow'}
-              text="Entrega rápida e rastreada"
+              text="Fast, tracked delivery"
               icon={<Timer size={16} weight="fill" />}
             />
             <HighlightItem
               color={'purple'}
-              text="O café chega fresquinho até você"
+              text="Coffee arrives fresh to you"
               icon={<Coffee size={16} weight="fill" />}
             />
           </div>
