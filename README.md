@@ -1,14 +1,15 @@
 # Coffee Delivery app
 
-This app is one of the challanges from the RocketSeat ReactJS's course.
+This app is one of the challenges proposed in the RocketSeat ReactJS's course.
 
-This is also available on [Netlify](https://marcelo-react-coffee-delivery.netlify.app/).
+This is also available on [Netlify](https://marcelo-react-coffee-delivery.netlify.app/). Click the link to see it in action!
 
 Additional features:
 
 -   all info is stored in the browser's localStorage
 -   a user details page with order history
 -   footer
+-   a dismissable store notice in the app's header
 
 # React + TypeScript + Vite
 
